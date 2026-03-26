@@ -1,0 +1,785 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Calculadora de ROI IA | Ironman de IA</title>
+<link href="https://fonts.googleapis.com/css2?family=VT323&display=swap" rel="stylesheet">
+
+<!-- Meta Pixel Code -->
+<script>
+!function(f,b,e,v,n,t,s)
+{if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+n.callMethod.apply(n,arguments):n.queue.push(arguments)};
+if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
+n.queue=[];t=b.createElement(e);t.async=!0;
+t.src=v;s=b.getElementsByTagName(e)[0];
+s.parentNode.insertBefore(t,s)}(window, document,'script',
+'https://connect.facebook.net/en_US/fbevents.js');
+fbq('init', '1274224524679737');
+fbq('track', 'PageView');
+</script>
+<noscript><img height="1" width="1" style="display:none"
+src="https://www.facebook.com/tr?id=1274224524679737&ev=PageView&noscript=1"
+/></noscript>
+<!-- End Meta Pixel Code -->
+
+<style>
+:root {
+  /* Fondo deportivo y enérgico */
+  --track-blue: #005bc5; 
+  
+  /* UI Win95 Clásica pero con acentos de Alto Rendimiento */
+  --ui:         #c0c0c0;
+  --ui-hi:      #ffffff;
+  --ui-sh:      #808080;
+  --ui-dk:      #404040;
+  --win-blue:   #000080;
+  --win-grad:   #1084d0;
+  --text:       #000000;
+  --muted:      #444444;
+  --red:        #e31837; 
+  --green:      #008800;
+  --yellow:     #ffdd00;
+  --amber:      #ff8800;
+  --px: 'VT323', monospace;
+  --rd: Tahoma, Verdana, sans-serif;
+}
+
+*,*::before,*::after { margin:0; padding:0; box-sizing:border-box; }
+
+html { scroll-behavior:smooth; }
+body {
+  background-color: var(--track-blue);
+  background-image: repeating-linear-gradient(
+    -45deg,
+    rgba(255, 255, 255, 0.1),
+    rgba(255, 255, 255, 0.1) 20px,
+    transparent 20px,
+    transparent 40px
+  );
+  font-family: var(--rd);
+  min-height: 100vh;
+  overflow-x: hidden;
+  color: var(--text);
+  cursor: default;
+}
+
+/* ── WALKERS (Atletas) ── */
+#walkers { position: fixed; inset: 0; pointer-events: none; z-index: 4; overflow: hidden; }
+.walker { position: absolute; font-size: clamp(16px,2.2vw,22px); user-select: none; line-height: 1; }
+@keyframes goR { from { transform: translateX(-80px) } to { transform: translateX(calc(100vw + 80px)) } }
+@keyframes goL { from { transform: translateX(calc(100vw+80px)) scaleX(-1) } to { transform: translateX(-80px) scaleX(-1) } }
+@keyframes bob { 0%,100% { margin-top: 0 } 50% { margin-top: -4px } }
+
+.wrap { position: relative; z-index: 10; max-width: 860px; margin: 0 auto; padding: 28px 16px 80px; }
+
+/* ── VENTANA WIN95 ── */
+.win {
+  background: var(--ui);
+  border-top:    2px solid var(--ui-hi);
+  border-left:   2px solid var(--ui-hi);
+  border-right:  2px solid var(--ui-dk);
+  border-bottom: 2px solid var(--ui-dk);
+  box-shadow: inset -1px -1px 0 var(--ui-sh), inset 1px 1px 0 #e8e8e8, 5px 5px 0 rgba(0,0,0,.4);
+  padding: 3px;
+  margin-bottom: 18px;
+}
+.wh {
+  background: linear-gradient(90deg, var(--red), var(--amber));
+  color: #fff;
+  padding: 6px 10px;
+  font-family: var(--px);
+  font-size: clamp(15px, 3.8vw, 20px);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 4px;
+  letter-spacing: .5px;
+}
+.wh.wh-red { background: linear-gradient(90deg, #aa0000, #550000) !important; }
+.wh.wh-green { background: linear-gradient(90deg, #003300, #1b7a1b) !important; }
+.wc { padding: 16px 18px 18px; }
+
+/* ── SCREENS ── */
+.screen { display: none; }
+.screen.active { display: block; animation: fadeUp .18s ease-out both; }
+
+/* ── HERO / CABECERA ── */
+.hero { text-align: center; margin-bottom: 28px; }
+.hero-badge {
+  display: inline-block; background: var(--yellow); color: #000; font-family: var(--px);
+  font-size: clamp(13px,3vw,17px); padding: 4px 16px; border: 2px outset #fff; margin-bottom: 16px; letter-spacing: 1px;
+}
+h1 {
+  font-family: var(--px); font-size: clamp(32px, 9vw, 68px); line-height: 1.05; color: #fff;
+  text-shadow: 2px 2px 0 #000, -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000; margin-bottom: 12px; text-transform: uppercase; font-weight: normal;
+}
+h1 .hl { 
+  color: var(--yellow); 
+  text-shadow: 3px 3px 0 #000, -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 2px 2px 0 #000; 
+  display: inline-block; 
+  margin-top: 6px; 
+  font-size: 1.15em;
+  letter-spacing: 2px;
+}
+.sub { font-size: 14px; color: #fff; font-weight: bold; text-shadow: 1px 1px 3px #000; max-width: 660px; margin: 0 auto; line-height: 1.7; }
+
+/* ── BLOQUE DE FORMULARIO ── */
+.block {
+  background: var(--ui); border-top: 2px solid var(--ui-hi); border-left: 2px solid var(--ui-hi);
+  border-right: 2px solid var(--ui-dk); border-bottom: 2px solid var(--ui-dk);
+  box-shadow: inset -1px -1px 0 var(--ui-sh), 4px 4px 0 rgba(0,0,0,.22); padding: 3px; margin-bottom: 10px;
+}
+.block-hd {
+  background: linear-gradient(90deg, var(--win-blue), var(--win-grad)); color: #fff; padding: 5px 10px;
+  font-family: var(--px); font-size: clamp(14px,3.5vw,19px); display: flex; justify-content: space-between; align-items: center; gap: 6px; letter-spacing: .5px;
+}
+.block-num { opacity: .7; font-size: .85em; }
+.block-title { flex: 1; }
+.block-body { padding: 14px 16px 16px; background: var(--ui); }
+
+/* ── TAGS ── */
+.tags { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 12px; }
+.tag {
+  padding: 8px 12px; background: #fff; border: 2px inset var(--ui-sh);
+  font-family: var(--rd); font-size: 12px; font-weight: bold; color: var(--text); cursor: pointer; user-select: none; transition: background .08s;
+}
+.tag:hover { background: #fffde0; }
+.tag.on {
+  background: var(--win-blue); color: #fff; border: 2px inset var(--ui-sh);
+  box-shadow: inset 2px 2px 5px rgba(0,0,0,0.5); font-family: var(--px); font-size: 15px; letter-spacing: 0.5px;
+}
+
+/* ── INPUTS & SLIDER ── */
+input[type=text], input[type=number], select {
+  width: 100%; background: #fff; border: 2px inset var(--ui-sh); color: var(--text);
+  font-family: var(--rd); font-size: 13px; font-weight: bold; padding: 8px 10px; outline: none;
+}
+.input-row { display: flex; align-items: center; gap: 10px; }
+.unit { font-family: var(--rd); font-size: 11px; font-weight: bold; color: var(--muted); white-space: nowrap; }
+
+.sl-wrap { background: #fff; border: 2px inset var(--ui-sh); padding: 14px 16px; margin-bottom: 4px; text-align: center; }
+.slider-val { font-family: var(--px); font-size: clamp(48px, 12vw, 68px); line-height: 1; color: var(--red); text-shadow: 2px 2px 0 #bbb; margin-bottom: 10px; }
+.slider-val span { font-family: var(--rd); font-size: 13px; color: var(--win-blue); font-weight: bold; margin-left: 6px; }
+input[type=range] { width: 100%; -webkit-appearance: none; height: 11px; background: #000; border: 2px solid var(--ui-sh); outline: none; box-shadow: inset 1px 1px 3px rgba(0,0,0,.7); margin: 8px 0 4px; }
+input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 22px; height: 32px; background: var(--ui); border-top: 2px solid var(--ui-hi); border-left: 2px solid var(--ui-hi); border-right: 2px solid var(--ui-dk); border-bottom: 2px solid var(--ui-dk); cursor: grab; }
+
+.adv-toggle {
+  display: block; width: 100%; padding: 10px 16px; background: var(--ui); border-top: 2px solid var(--ui-hi); border-left: 2px solid var(--ui-hi); border-right: 2px solid var(--ui-dk); border-bottom: 2px solid var(--ui-dk);
+  font-family: var(--px); font-size: 17px; color: var(--muted); cursor: pointer; margin-bottom: 10px; text-align: left; box-shadow: inset -1px -1px 0 var(--ui-sh);
+}
+#adv { display: none; margin-bottom: 10px; }
+
+/* ── BOTONES ── */
+.btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 8px; width: 100%; padding: 14px 18px; background: var(--ui); color: var(--text);
+  border-top: 2px solid var(--ui-hi); border-left: 2px solid var(--ui-hi); border-right: 2px solid var(--ui-dk); border-bottom: 2px solid var(--ui-dk);
+  font-family: var(--px); font-size: clamp(19px, 5vw, 26px); cursor: pointer; box-shadow: inset -1px -1px 0 var(--ui-sh), inset 1px 1px 0 #e8e8e8; margin-top: 4px; letter-spacing: 1px; transition: none;
+}
+.btn:active:not(:disabled) { border-top-color: var(--ui-dk); border-left-color: var(--ui-dk); border-right-color: var(--ui-hi); border-bottom-color: var(--ui-hi); transform: translate(1px, 1px); box-shadow: none; }
+
+/* ── SUSPENSE (MS-DOS) ── */
+.sus { text-align: center; padding: 28px 10px; }
+.sus-spin { font-size: 56px; display: block; margin: 0 auto 14px; animation: spin 2.5s linear infinite; }
+.sus-title { font-family: var(--px); font-size: clamp(20px,5vw,28px); margin-bottom: 12px; text-transform: uppercase; color: var(--red); }
+.sus-console { font-family: var(--px); font-size: clamp(16px,3.8vw,21px); color: var(--text); margin-bottom: 4px; min-height: 26px; }
+.sus-matrix { font-size: 10px; color: #888; font-weight: bold; word-break: break-all; padding: 0 6px; }
+.sus-prog { height: 14px; background: #fff; border: 2px inset var(--ui-sh); padding: 2px; margin-top: 14px; }
+.sus-fill { height: 100%; width: 0%; background: linear-gradient(90deg, var(--yellow), var(--red)); transition: width .5s; }
+
+/* ── RESULTS ── */
+.flair { display: inline-block; font-family: var(--px); font-size: clamp(12px,3vw,18px); color: var(--red); background: #ffff00; padding: 3px 10px; border: 2px solid #000; margin-bottom: 10px; animation: blink .55s step-end infinite; letter-spacing: 1px; }
+
+.zone-banner { background: #111; border: 3px solid #333; border-top: 2px solid var(--ui-hi); border-left: 2px solid var(--ui-hi); border-right: 2px solid var(--ui-dk); border-bottom: 2px solid var(--ui-dk); padding: 8px; margin-bottom: 16px; position: relative; display: flex; align-items: stretch; gap: 10px; flex-wrap: wrap; }
+.zone-art-box { background: #000; border: 2px inset #333; padding: 10px; flex: 0 0 130px; display: flex; align-items: center; justify-content: center; overflow: hidden;}
+.zone-art { font-size: clamp(9px, 2vw, 12px); line-height: 1.2; font-family: 'Courier New', monospace; white-space: pre; font-weight: bold; }
+.zone-info { flex: 1; padding: 10px; background: #fff; border: 2px inset var(--ui-sh); }
+.zone-eyebrow { font-family: var(--px); font-size: 16px; letter-spacing: 1px; color: var(--muted); margin-bottom: 4px; text-transform: uppercase; }
+.zone-title { font-family: var(--px); font-size: clamp(26px, 6vw, 38px); line-height: 1; text-transform: uppercase; margin-bottom: 6px; color: var(--red); text-shadow: 1px 1px 0px #ccc; }
+.zone-desc { font-size: 12px; font-weight: bold; color: var(--muted); line-height: 1.55; }
+
+.m-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 10px; margin-bottom: 14px; }
+@media(max-width:640px){ .m-grid { grid-template-columns: 1fr; } }
+.m-card { background: #fff; border: 2px inset var(--ui-sh); padding: 14px; text-align: center; display:flex; flex-direction:column; justify-content: center;}
+.m-card.hi { background: #f0fff4; }
+.m-label { font-family: var(--px); font-size: 16px; color: var(--muted); margin-bottom: 6px; text-transform: uppercase; }
+.m-val { font-family: var(--px); font-size: clamp(28px, 6vw, 38px); line-height: 1; color: var(--red); text-shadow: 2px 2px 0 #bbb; }
+.m-val.pos { color: var(--green); }
+.m-sub { font-size: 11px; font-weight: bold; color: #666; margin-top: 6px; line-height: 1.4; }
+
+/* ROI Input */
+.roi-sep { margin-top: 12px; padding-top: 12px; border-top: 2px inset var(--ui-sh); }
+.roi-input { background: #fff; border: 2px inset var(--ui-sh); font-size: 12px; font-weight: bold; padding: 6px 10px; width: 100%; outline: none; text-align:center;}
+.roi-result { font-size: 11px; font-weight: bold; color: var(--muted); margin-top: 6px; line-height: 1.4; }
+
+/* Stacked bar */
+.bar-section { background: #fff; border: 2px inset var(--ui-sh); padding: 14px 16px; margin-bottom: 16px; }
+.bar-title { font-family: var(--px); font-size: clamp(16px,4vw,20px); color: var(--win-blue); margin-bottom: 14px; display: flex; justify-content: space-between; align-items: baseline; text-transform: uppercase; }
+.friction-pct { font-family: var(--px); font-size: clamp(20px,5vw,28px); color: var(--red); text-shadow: 1px 1px 0 #bbb; }
+.stacked-bar { height: 28px; display: flex; overflow: hidden; background: #000; border: 2px inset var(--ui-sh); margin-bottom: 12px; }
+.seg { height: 100%; transition: width 1.2s ease; width: 0; }
+.seg-base { background: var(--win-blue); }
+.seg-err  { background: var(--red); }
+.bar-legend { display: flex; gap: 18px; flex-wrap: wrap; }
+.legend-item { display: flex; align-items: center; gap: 6px; font-size: 11px; font-weight: bold; color: var(--muted); }
+.l-dot { width: 12px; height: 12px; flex-shrink: 0; border: 1px solid #000;}
+
+/* Breakdown details */
+.detail-section { background: #fff; border: 2px inset var(--ui-sh); padding: 14px 16px; margin-bottom: 12px; }
+.d-row { display: flex; justify-content: space-between; align-items: baseline; padding: 7px 0; border-bottom: 1px dashed #ccc; gap: 10px;}
+.d-row:last-child { border-bottom: none; }
+.d-row.total { border-top: 2px solid var(--ui-sh); border-bottom: none; padding-top: 12px; margin-top: 4px; }
+.d-label { font-size: 12px; font-weight: bold; color: var(--text); }
+.d-label.dimmed { color: var(--muted); font-size: 11px; }
+.d-val { font-family: var(--px); font-size: 18px; color: var(--text); white-space:nowrap;}
+.d-val.neg { color: var(--red); }
+.d-val.pos { color: var(--green); }
+.d-val.amber { color: var(--amber); }
+
+/* Supuestos (Assumptions) Toggle */
+.assumptions { background: #fff; border: 2px inset var(--ui-sh); padding: 8px 14px; margin-bottom: 16px; font-size: 11px; color: var(--muted); line-height: 1.5; font-weight: bold;}
+.assumptions summary { font-family: var(--px); font-size: 15px; color: var(--win-blue); cursor: pointer; outline: none; list-style: none; text-transform: uppercase; letter-spacing: 0.5px;}
+.assumptions summary::-webkit-details-marker { display: none; }
+.assumptions summary::before { content: '[+] '; color: var(--red); }
+.assumptions[open] summary::before { content: '[-] '; }
+.assumptions ul { margin-top: 10px; padding-left: 20px; }
+.assumptions li { margin-bottom: 6px; }
+
+/* Veredicto & Context */
+.veredicto { background: #fff; border: 2px inset var(--ui-sh); padding: 16px 18px; margin-bottom: 16px; font-size: 13px; font-weight: bold; line-height: 1.6; color: var(--text); }
+.result-context { background: #fff; border: 2px inset var(--ui-sh); padding: 12px 14px; margin-bottom: 16px; font-size: 11px; font-weight: bold; color: var(--muted); line-height: 1.6; }
+
+/* Zone Colors overrides */
+.z-elite .zone-art { color: #00ff00; text-shadow: 0 0 5px #00ff00; }
+.z-amateur .zone-art { color: #ffaa00; text-shadow: 0 0 5px #ffaa00; }
+.z-sedentario .zone-art { color: #ff5500; }
+.z-lesionado .zone-art { color: #ff0000; animation: blink .8s step-end infinite; }
+.z-fuera .zone-art { color: #ff0000; animation: blink .3s step-end infinite; text-shadow: 0 0 10px #ff0000; }
+
+/* CTAs Blocks */
+.cta-box-inner { background: #fff; border: 2px inset var(--ui-sh); padding: 32px 28px; text-align: center; }
+.optin-row { display: flex; gap: 8px; max-width: 520px; margin: 0 auto; flex-wrap: wrap; }
+.optin-in { flex: 1; min-width: 200px; }
+
+/* Pre-format Box for CFO Copy */
+.social-pre { background: #fff; border: 2px inset var(--ui-sh); padding: 14px; font-family: var(--rd); font-size: 12px; white-space: pre-wrap; line-height: 1.6; font-weight: 500; max-height: 280px; overflow-y: auto; text-align: left; margin-bottom: 14px; color: var(--muted); }
+.social-pre strong { color: var(--text); }
+
+/* Credits */
+.credits { text-align: center; font-family: var(--px); font-size: 13px; color: #fff; margin-top: 24px; text-shadow: 2px 2px 0 #000; line-height: 1.6; padding-bottom: 16px; }
+.credits span { color: var(--yellow); }
+
+@keyframes fadeUp { from { opacity: 0; transform: translateY(5px) } to { opacity: 1; transform: translateY(0) } }
+@keyframes spin { 100% { transform: rotate(360deg) } }
+@keyframes blink { 0%,100% { opacity: 1 } 50% { opacity: 0 } }
+@keyframes shake { 0%,100%{transform:translateX(0)} 15%{transform:translateX(-5px) rotate(-.4deg)} 30%{transform:translateX(5px) rotate(.4deg)} 50%{transform:translateX(-3px)} 70%{transform:translateX(3px)} 90%{transform:translateX(-1px)} }
+</style>
+</head>
+<body>
+
+<div id="walkers"></div>
+
+<div class="wrap">
+  <div class="hero">
+    <div class="hero-badge">[ CALCULADORA DE ROI IA ]</div>
+    <h1 style="line-height:1.1;">La IA no es<br>una pastilla.<br><span class="hl">ES UN IRONMAN.</span></h1>
+    <p class="sub">
+      <strong style="color:var(--yellow);">Antes de entrenar, necesitás saber en qué forma estás.</strong><br>
+      La calculadora te muestra exactamente cuánto te cuesta operar sin automatización — <strong>en 2 minutos.</strong>
+    </p>
+  </div>
+
+  <!-- PANTALLA 1: FORMULARIO -->
+  <div id="s-form" class="screen active">
+    <div class="win">
+      <div class="wh"><div>PARÁMETROS DEL SISTEMA</div><div>_ [] X</div></div>
+      <div class="wc">
+        <div class="block">
+          <div class="block-hd"><span class="block-num">01</span><span class="block-title">Proceso repetitivo principal</span></div>
+          <div class="block-body">
+            <div class="tags" id="tags1">
+              <div class="tag" onclick="A.selTag(this,'Atención al cliente')">Atención al cliente</div>
+              <div class="tag" onclick="A.selTag(this,'Calificación de leads')">Calificación de leads</div>
+              <div class="tag" onclick="A.selTag(this,'Facturación y cobranzas')">Facturación y cobranzas</div>
+              <div class="tag" onclick="A.selTag(this,'Reportes')">Reportes</div>
+              <div class="tag" onclick="A.selTag(this,'Onboarding')">Onboarding</div>
+              <div class="tag" onclick="A.selTag(this,'Carga de datos')">Carga de datos</div>
+              <div class="tag" onclick="A.selTag(this,'Agendamiento')">Agendamiento</div>
+              <div class="tag" onclick="A.selTag(this,'Soporte interno')">Soporte interno</div>
+              <div class="tag" onclick="A.selTag(this,'Gestión de emails')">Gestión de emails</div>
+              <div class="tag" onclick="A.selTag(this,'Conciliación de datos')">Conciliación de datos</div>
+            </div>
+            <input type="text" id="proc1" placeholder="O describí tu proceso específico..." oninput="A.p1=this.value;A.clearTags()">
+          </div>
+        </div>
+
+        <div class="block">
+          <div class="block-hd"><span class="block-num">02</span><span class="block-title">Horas semanales por persona</span></div>
+          <div class="block-body">
+            <div class="sl-wrap">
+              <div class="slider-val" id="hDisp">10 <span>hs / sem</span></div>
+              <input type="range" id="hSlider" min="1" max="60" value="10" oninput="document.getElementById('hDisp').innerHTML=this.value+' <span>hs / sem</span>'">
+            </div>
+          </div>
+        </div>
+
+        <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap:10px;">
+          <div class="block" style="margin-bottom:0;">
+            <div class="block-hd"><span class="block-num">03</span><span class="block-title">Costo por hora (fully-loaded)</span></div>
+            <div class="block-body"><input type="number" id="rate" value="20" min="1" max="500"></div>
+          </div>
+          <div class="block" style="margin-bottom:0;">
+            <div class="block-hd"><span class="block-num">04</span><span class="block-title">Cantidad de personas involucradas</span></div>
+            <div class="block-body"><input type="number" id="team" value="3" min="1" max="200"></div>
+          </div>
+        </div>
+        <br>
+        <div class="block">
+          <div class="block-hd"><span class="block-num">05</span><span class="block-title">Tasa de errores / retrasos</span></div>
+          <div class="block-body">
+            <select id="err">
+              <option value="0.02">Baja — casi no hay errores (2%)</option>
+              <option value="0.05" selected>Media — algún error por semana (5%)</option>
+              <option value="0.10">Alta — varios errores frecuentes (10%)</option>
+              <option value="0.20">Crítica — proceso problemático (20%)</option>
+            </select>
+          </div>
+        </div>
+
+        <button class="adv-toggle" onclick="A.toggleAdv()" id="advBtn">+ Ajustes avanzados (tipo de solución y complejidad)</button>
+        <div id="adv">
+          <div class="block"><div class="block-hd"><span class="block-title">Tipo de solución</span></div><div class="block-body"><select id="sol"><option value="0.15">Asistente / Copiloto — mejora productividad (~15% ahorro)</option><option value="0.50" selected>Automatización completa — delegación total (~50% ahorro)</option></select></div></div>
+          <div class="block"><div class="block-hd"><span class="block-title">Variabilidad del proceso</span></div><div class="block-body"><select id="comp"><option value="1.0">Baja — reglas claras, alta repetición (100% captura)</option><option value="0.6" selected>Media — flujo estándar con excepciones (60% captura)</option><option value="0.3">Alta — contexto variable, supervisión humana (30% captura)</option></select></div></div>
+        </div>
+
+        <button class="btn" onclick="A.calc()">⚙ CALCULAR MI DEUDA OPERATIVA ▶</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- PANTALLA 2: SUSPENSE -->
+  <div id="s-calc" class="screen">
+    <div class="win">
+      <div class="wh"><div>AUDITANDO INFRAESTRUCTURA</div><div>_ [] X</div></div>
+      <div class="wc sus">
+        <span class="sus-spin">⚙️</span>
+        <h2 class="sus-title">CALCULANDO FRICCIÓN...</h2>
+        <div class="sus-console" id="sus-line">Iniciando escaneo...</div>
+        <div class="sus-matrix" id="sus-mx">LOADING_DEBT.EXE</div>
+        <div class="sus-prog"><div class="sus-fill" id="sus-fill"></div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PANTALLA 3: RESULTADOS -->
+  <div id="s-res" class="screen">
+    <div class="win">
+      <div class="wh wh-red" id="res-wh"><div>REPORTE DE COSTO OCULTO</div><div>_ [] X</div></div>
+      <div class="wc">
+        
+        <div id="reveal-countdown" style="text-align:center;padding:20px 0 30px;">
+          <div style="font-family:var(--px);font-size:clamp(16px,4vw,22px);color:#888;margin-bottom:8px;letter-spacing:2px;">COMPILANDO DATOS ECONÓMICOS...</div>
+          <div id="countdown-num" style="font-family:var(--px);font-size:clamp(60px,15vw,80px);color:var(--yellow);line-height:1;text-shadow:2px 2px 0 #000;animation:blink .4s step-end infinite;">3</div>
+        </div>
+
+        <div id="res-content" style="display:none;">
+          <div style="text-align:center; margin-bottom: 16px;">
+            <div class="flair" id="r-flair">>>> ALERTA DE SISTEMA <<<</div>
+            <div style="font-family:var(--px);font-size:20px;color:var(--muted);text-transform:uppercase;">Costo Operativo Directo Anual</div>
+            <div id="r-total" style="font-family:var(--px);font-size:clamp(60px,14vw,90px);line-height:1;color:var(--red);text-shadow:3px 3px 0 #ccc;">$0</div>
+          </div>
+
+          <div class="result-context">
+            <strong>Nota metodológica:</strong> Este diagnóstico usa supuestos conservadores basados en evidencia de Stanford HAI (2025), Deloitte (2025), NBER y Harvard Business School sobre automatización, productividad con IA y tiempos de ROI. Los resultados son estimaciones direccionales útiles para priorizar.
+          </div>
+
+          <div class="zone-banner" id="zoneBanner">
+            <div class="zone-art-box"><div class="zone-art" id="z-art"></div></div>
+            <div class="zone-info">
+              <div class="zone-eyebrow" id="z-eyebrow">Evaluando rendimiento operativo…</div>
+              <div class="zone-title" id="z-title">TÍTULO</div>
+              <div class="zone-desc" id="z-desc">Descripción</div>
+            </div>
+          </div>
+
+          <div class="m-grid">
+            <div class="m-card hi">
+              <div class="m-label">Ahorro neto anual estimado</div>
+              <div class="m-val pos" id="r-net">$0</div>
+              <div class="m-sub">Recuperable después de descontar OPEX estimado de operación.</div>
+            </div>
+            <div class="m-card">
+              <div class="m-label">Inversión recomendada (payback 6m)</div>
+              <div class="m-val" id="r-maxinv" style="color:var(--text);">$0</div>
+              <div class="m-sub">Presupuesto de setup compatible con retorno en 6 meses.</div>
+            </div>
+            <div class="m-card" id="roiCard">
+              <div class="m-label">Simulador de ROI</div>
+              <div class="m-val" id="r-roi" style="color:var(--text);">—</div>
+              <div class="roi-sep">
+                <input type="number" class="roi-input" id="setupInput" placeholder="Presupuesto setup ($)" oninput="A.updateROI()">
+                <div class="roi-result" id="roi-result">Ingresá presupuesto para simular ROI</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="bar-section">
+            <div class="bar-title">
+              <span>Composición del costo</span>
+              <span class="friction-pct" id="r-friction">Fricción: 0%</span>
+            </div>
+            <div class="stacked-bar">
+              <div class="seg seg-base" id="bar-base"></div>
+              <div class="seg seg-err" id="bar-err"></div>
+            </div>
+            <div class="bar-legend">
+              <div class="legend-item"><div class="l-dot" style="background:var(--win-blue)"></div>Trabajo manual base</div>
+              <div class="legend-item"><div class="l-dot" style="background:var(--red)"></div>Errores + retrabajo</div>
+            </div>
+          </div>
+
+          <div class="detail-section">
+            <div style="font-family:var(--px);font-size:18px;color:var(--win-blue);margin-bottom:10px;text-transform:uppercase;">Desglose del modelo</div>
+            <div class="d-row"><span class="d-label">Trabajo manual base (anual)</span><span class="d-val" id="d-base">$0</span></div>
+            <div class="d-row"><span class="d-label">Costo de error y retrabajo</span><span class="d-val neg" id="d-err">$0</span></div>
+            <div class="d-row"><span class="d-label dimmed">Costo de oportunidad estimado (no garantizado)</span><span class="d-val amber" id="d-opp">$0</span></div>
+            <div class="d-row"><span class="d-label">Costo anual de operación (OPEX)</span><span class="d-val neg" id="d-opex">$0</span></div>
+            <div class="d-row total"><span class="d-label">Ahorro directo bruto (costo directo × % captura IA)</span><span class="d-val pos" id="d-dir" style="font-size:20px;">$0</span></div>
+          </div>
+          
+          <details class="assumptions">
+            <summary>Ver supuestos del modelo matemático</summary>
+            <ul>
+              <li>50 semanas laborales por año.</li>
+              <li>El retrabajo por error (fricción) se penaliza con un multiplicador de 1.5×.</li>
+              <li>OPEX estimado (Servidores IA): $600 base + $240 anual por persona involucrada.</li>
+              <li>El costo de oportunidad (upside estratégico) varía según la variabilidad del proceso: 10% (Baja), 20% (Media), 30% (Alta). No está garantizado.</li>
+              <li>El ahorro directo se obtiene aplicando el límite de la solución IA elegida y su capacidad de captura sobre el costo directo total.</li>
+            </ul>
+          </details>
+
+          <div class="veredicto" id="veredicto"></div>
+
+          <!-- PITCH PARA EL CFO (COPIAR Y PEGAR) -->
+          <div class="win" style="margin-top:20px; box-shadow: 6px 6px 0 rgba(0,0,0,.3);">
+            <div class="wh wh-green"><div>PITCH A PRUEBA DE BALAS</div></div>
+            <div class="cta-box-inner" style="padding: 24px 20px;">
+              <h3 style="font-family:var(--px);font-size:clamp(20px,5vw,26px);color:var(--green);margin-bottom:6px;text-transform:uppercase;">MEMO PARA EL CFO (O DIRECTORIO)</h3>
+              <p style="font-size:12px;color:var(--muted);font-weight:bold;margin-bottom:16px;">El 90% de los proyectos de IA mueren porque el pitch parece magia. Copiá este caso de negocio ultra-conservador y lográ que te aprueben el presupuesto hoy.</p>
+              
+              <div class="social-pre" id="cfo-pre">—</div>
+              
+              <button class="btn" style="background:#006600;color:#fff;border-top-color:#00aa00;border-left-color:#00aa00;border-right-color:#003300;border-bottom-color:#003300;font-size:clamp(16px,4vw,20px);" onclick="A.copyCFO(this)">📋 COPIAR MEMO PARA EL CFO</button>
+            </div>
+          </div>
+
+          <!-- CTA BLOCK: NETWORKING Y DAVID GOGGINS -->
+          <div class="win" style="margin-top:20px; box-shadow: 6px 6px 0 rgba(0,0,0,.3);">
+            <div class="wh"><div>Red de Contactos</div></div>
+            <div class="cta-box-inner">
+              <div style="font-family:var(--px);font-size:clamp(22px,6vw,34px);line-height:1.1;color:var(--win-blue);margin-bottom:12px;text-transform:uppercase;">El entrenamiento empieza hoy.</div>
+              <p style="font-size:13px;font-weight:bold;color:var(--muted);line-height:1.6;margin-bottom:24px;text-align:left;">
+                Si el diagnóstico te sumó valor, dejame tu perfil de LinkedIn y en estos días te agrego para seguir en contacto <em style="color:var(--win-blue); font-style:normal;">(bueno, yo no… mis AI employees)</em>. 
+                <br><br>
+                Pero lo más importante: <strong>tomá acción y empezá ya a ejercitar tu operación.</strong> Y cuando duela, recordá la mentalidad del ex-navy seal David Goggins, <em style="color:var(--red); font-style:normal;">"yo me gané este dolor, ahora dejame disfrutarlo."</em>
+              </p>
+              
+              <div id="cta-form-area">
+                <div class="optin-row">
+                  <input type="text" class="optin-in input-row" id="optLinkedIn" placeholder="linkedin.com/in/tu-perfil">
+                  <button class="btn" style="width:auto; margin-top:0;" onclick="A.submitOptin()">CONECTAR EN LINKEDIN ▶</button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <button class="btn btn-li" onclick="A.sw('s-res','s-form')" style="background:#0077b5;color:#fff;border-top-color:#55aaff;border-left-color:#55aaff;border-right-color:#003366;border-bottom-color:#003366;margin-top:20px;font-size:16px;">◀ RECALCULAR DEUDA OPERATIVA</button>
+          
+        </div>
+
+      </div>
+    </div>
+    
+    <!-- CRÉDITOS (Estilo Theme Park) -->
+    <div class="credits" id="credits-block">DIAGNÓSTICO AUDITADO POR:<br>
+      <span>THE BOARD</span> (OGILVY, SUBY, BRUNSON, VAYNERCHUK) &amp; <span>AXEL LABAN ARZUBI</span>
+    </div>
+
+  </div>
+</div>
+
+<script>
+const ASCII = {
+  'z-elite': "  /\\  /\\\n /  \\/  \\\n| SYSTEM|\n| OPTIM |\n|_100%__|\n [||||]",
+  'z-amateur': " .===.\n|FLOW |\n|OK   |\n|---  |\n'====='",
+  'z-sedentario': "  _____\n /     \\\n| DEBT  |\n \\___/\n  | |",
+  'z-lesionado': " ???\n[WARN ]\n LAG!\n  N/A",
+  'z-fuera': " !!!\n[ERROR]\nCRASH!\n SYSTEM\n DOWN!"
+};
+
+const ZONES = [
+  { max: 10000,   cls: 'z-elite',      label: 'ATLETA DE ÉLITE',       flair: '>>> SISTEMA SALUDABLE <<<', desc: 'Tu operación ya es eficiente. La fricción es baja. La automatización es una mejora de performance, no una urgencia médica.' },
+  { max: 25000,   cls: 'z-amateur',    label: 'AMATEUR CON POTENCIAL', flair: '>>> ALERTA DE FRICCIÓN LEVE <<<', desc: 'El proceso parece estable, pero ya existe una pérdida recurrente. Corregirla ahora es más barato que cuando escale.' },
+  { max: 75000,   cls: 'z-sedentario', label: 'SEDENTARIO',            flair: '>>> WARNING: DESGASTE VISIBLE <<<', desc: 'Tu equipo está absorbiendo trabajo repetitivo que ya debería estar automatizado. Cada mes que esperás acumula deuda operativa.' },
+  { max: 150000,  cls: 'z-lesionado',  label: 'LESIONADO',             flair: '>>> CUELLO DE BOTELLA CRÍTICO <<<', desc: 'Escalás con personas lo que debería escalar con sistemas. El margen y la velocidad se deterioran rápidamente.' },
+  { max: Infinity,cls: 'z-fuera',      label: 'FUERA DE COMPETENCIA',  flair: '>>> RIESGO ESTRUCTURAL MASIVO <<<', desc: 'La estructura operativa ya no soporta el crecimiento manual. El costo de no intervenir ya es material y crítico.' },
+];
+
+const A = {
+  p1: 'tu proceso',
+  netoAnual: 0,
+  directCostGlobal: 0,
+  
+  init() { this.spawnWalkers(); },
+
+  spawnWalkers() {
+    const POOL = ['🏃‍♂️','🚴‍♀️','🏊‍♂️','👟','⚡','⏱️','🔥','💪','🏆','🏅','🏁','🔋'];
+    const spawn = () => {
+      const c = document.getElementById('walkers'); if(!c) return;
+      const em = POOL[Math.floor(Math.random()*POOL.length)];
+      const v = document.createElement('div'); v.className = 'walker'; v.textContent = em;
+      v.style.top = Math.floor(Math.random()*85+5)+'vh';
+      const dur = Math.floor(Math.random()*6+10);
+      const left = Math.random()>.5;
+      v.style.animation = (left?'goL':'goR')+' '+dur+'s linear forwards, bob .45s infinite alternate';
+      c.appendChild(v);
+      setTimeout(() => v.parentNode&&v.parentNode.removeChild(v), dur*1000);
+    };
+    for(let i=0;i<5;i++) setTimeout(spawn, Math.random()*2000);
+    setInterval(spawn, 2500);
+  },
+
+  selTag(el, val) {
+    document.querySelectorAll('.tag').forEach(t => t.classList.remove('on'));
+    el.classList.add('on');
+    this.p1 = val;
+    document.getElementById('proc1').value = '';
+  },
+  
+  clearTags() { document.querySelectorAll('.tag').forEach(t => t.classList.remove('on')); },
+
+  toggleAdv() {
+    const d = document.getElementById('adv');
+    const b = document.getElementById('advBtn');
+    const open = window.getComputedStyle(d).display === 'block';
+    d.style.display = open ? 'none' : 'block';
+    b.textContent = open ? '+ Ajustes avanzados (tipo de solución y complejidad)' : '− Ocultar ajustes avanzados';
+  },
+
+  fmt(n) {
+    n = Math.round(n);
+    if(n >= 1000000) return '$' + (n/1000000).toFixed(1) + 'M';
+    if(n >= 1000) return '$' + Math.round(n/1000) + 'K';
+    return '$' + n.toLocaleString();
+  },
+
+  sw(from, to) {
+    document.getElementById(from).classList.remove('active');
+    const el = document.getElementById(to); el.classList.add('active');
+    el.style.animation='none'; void el.offsetHeight; el.style.animation='';
+    window.scrollTo({top:0, behavior:'smooth'});
+  },
+
+  calc() {
+    this.sw('s-form', 's-calc');
+    const lines = ["Extrayendo datos de fricción...","Calculando horas perdidas...","Evaluando costo de errores humanos...","Proyectando oportunidad de automatización..."];
+    let step = 0;
+    const lineEl = document.getElementById('sus-line'), mxEl = document.getElementById('sus-mx'), fillEl = document.getElementById('sus-fill');
+    const chars = '0123456789$!*#@%';
+    const dec = setInterval(() => { let s=''; for(let i=0;i<16;i++) s+=chars[Math.floor(Math.random()*chars.length)]; if(mxEl) mxEl.textContent='LOADING_DEBT_'+s+'.EXE'; }, 60);
+    
+    const ticker = setInterval(() => {
+      if(step < lines.length) { if(lineEl) lineEl.textContent = lines[step]; if(fillEl) fillEl.style.width = (((step+1)/lines.length)*100)+'%'; step++; }
+      else { clearInterval(ticker); clearInterval(dec); setTimeout(() => this.showRes(), 400); }
+    }, 700);
+  },
+
+  showRes() {
+    this.sw('s-calc', 's-res');
+    
+    // Matemáticas originales mantenidas
+    const h = +(document.getElementById('hSlider').value || 10);
+    const rate = +(document.getElementById('rate').value || 20);
+    const team = +(document.getElementById('team').value || 3);
+    const tErr = +(document.getElementById('err').value || 0.05);
+    const cob = +(document.getElementById('sol').value || 0.50);
+    const adj = +(document.getElementById('comp').value || 0.6);
+
+    const baseLabor = h * team * rate * 50;
+    const errCost = baseLabor * tErr * 1.5;
+    const directCost = baseLabor + errCost;
+    this.directCostGlobal = directCost;
+    
+    const opp = baseLabor * (adj === 1.0 ? 0.1 : adj === 0.6 ? 0.2 : 0.3);
+    const grossDir = directCost * cob * adj;
+    const grossStrat = opp * cob * adj;
+    const opex = 600 + (team * 240);
+    this.netoAnual = Math.max(0, grossDir + grossStrat - opex);
+
+    // DOM Updates Principales
+    const zone = ZONES.find(z => directCost < z.max);
+    document.getElementById('zoneBanner').className = 'zone-banner ' + zone.cls;
+    document.getElementById('z-art').textContent = ASCII[zone.cls];
+    document.getElementById('z-title').textContent = zone.label;
+    document.getElementById('z-desc').textContent = zone.desc;
+    document.getElementById('r-flair').textContent = zone.flair;
+
+    document.getElementById('d-base').textContent = this.fmt(baseLabor);
+    document.getElementById('d-err').textContent = '−' + this.fmt(errCost);
+    document.getElementById('d-opp').textContent = this.fmt(opp);
+    document.getElementById('d-opex').textContent = '−' + this.fmt(opex);
+    document.getElementById('d-dir').textContent = this.fmt(grossDir);
+    document.getElementById('r-maxinv').textContent = this.fmt(Math.max(0, this.netoAnual / 2));
+    
+    const fp = Math.round((errCost / directCost) * 100);
+    document.getElementById('r-friction').textContent = 'Fricción: ' + fp + '%';
+    
+    // Veredicto
+    const vEl = document.getElementById('veredicto');
+    if (this.netoAnual === 0) {
+      vEl.innerHTML = `<strong>Diagnóstico:</strong> Con el volumen y costos actuales, el modelo no muestra ahorro neto atractivo bajo estos supuestos. Antes de automatizar, conviene estandarizar mejor el proceso o ganar más escala.`;
+    } else if (this.netoAnual < 5000) {
+      vEl.innerHTML = `<strong>Diagnóstico:</strong> En <em style="color:var(--win-blue)">"${this.p1}"</em> ya existe una oportunidad, pero todavía es marginal con estos supuestos. Puede tener sentido si además mejora tiempos de respuesta o capacidad futura.`;
+    } else {
+      vEl.innerHTML = `<strong>Diagnóstico:</strong> En <em style="color:var(--win-blue)">"${this.p1}"</em> hay fricción suficiente para justificar un análisis serio. El modelo estima <strong>${this.fmt(this.netoAnual)} de oportunidad neta anual</strong> sobre una carga operativa directa de <strong>${this.fmt(directCost)}</strong>.`;
+    }
+
+    // GENERADOR DE TEXTO PARA CFO
+    const errPct = Math.round(tErr * 100);
+    const cobPct = Math.round(cob * 100);
+    const adjPct = Math.round(adj * 100);
+    
+    const cfoText = `📋 CASO DE NEGOCIO: ROI DE IA EN "${this.p1.toUpperCase()}"\n\n` +
+      `1. EL COSTO DIRECTO REAL (La Hemorragia)\n` +
+      `Este proceso nos consume ${this.fmt(baseLabor)} en horas base. Sumando la penalidad estadística por tasa de error/fricción (${errPct}%), el costo de retrabajo dispara el Costo Operativo Directo a ${this.fmt(directCost)} anuales.\n\n` +
+      `2. EL DESCUENTO DE LA IA (Filtro de Realidad)\n` +
+      `No propongo automatizar el 100% de forma mágica. El modelo aplica dos filtros conservadores:\n` +
+      `- Tipo de solución: Asume un tope de delegación/eficiencia del ${cobPct}%.\n` +
+      `- Variabilidad: La IA procesará solo el ${adjPct}% del volumen total (asumiendo que el resto requiere criterio humano).\n` +
+      `Bajo este escenario pesimista, el Ahorro Bruto proyectado es de ${this.fmt(grossDir)}.\n\n` +
+      `3. RESULTADO NETO (ROI)\n` +
+      `+ Ahorro Bruto: ${this.fmt(grossDir)}\n` +
+      `+ Upside (Reasignación de horas): ${this.fmt(grossStrat)}\n` +
+      `- OPEX (Infraestructura y Servidores IA): -${this.fmt(opex)}\n` +
+      `= AHORRO NETO ANUAL: ${this.fmt(this.netoAnual)}\n\n` +
+      `Conclusión: Asumiendo que la tecnología solo ataje el ${adjPct}% del problema, el sistema paga su propio mantenimiento, frenamos el costo de retrabajo y recuperamos ${this.fmt(this.netoAnual)} netos al año. Deberíamos avanzar con la evaluación técnica.`;
+
+    document.getElementById('cfo-pre').textContent = cfoText;
+
+    // Animación y Revelación
+    const cd = document.getElementById('reveal-countdown');
+    const cdNum = document.getElementById('countdown-num');
+    const rc = document.getElementById('res-content');
+    
+    cd.style.display = 'block'; rc.style.display = 'none';
+    let count = 3;
+    const tick = setInterval(() => {
+      count--;
+      if(count > 0) cdNum.textContent = count;
+      else {
+        clearInterval(tick); cd.style.display = 'block'; rc.style.display = 'block'; cd.style.display='none';
+        
+        // Disparar las animaciones
+        this.animVal('r-total', 0, directCost, 900);
+        this.animVal('r-net', 0, this.netoAnual, 900);
+        
+        setTimeout(() => {
+          document.getElementById('bar-base').style.width = (baseLabor / directCost * 100).toFixed(1) + '%';
+          document.getElementById('bar-err').style.width  = (errCost   / directCost * 100).toFixed(1) + '%';
+        }, 100);
+
+        if(zone.cls === 'z-lesionado' || zone.cls === 'z-fuera') {
+          document.body.style.animation = 'shake .5s ease both';
+          setTimeout(()=>document.body.style.animation='', 600);
+        }
+      }
+    }, 700);
+  },
+
+  copyCFO(btn) {
+    navigator.clipboard.writeText(document.getElementById('cfo-pre').textContent).then(() => {
+      const o = btn.innerHTML;
+      btn.innerHTML = '¡COPIADO AL PORTAPAPELES! ✔️';
+      setTimeout(() => btn.innerHTML = o, 3000);
+    });
+  },
+
+  updateROI() {
+    const setupInput = document.getElementById('setupInput');
+    const setup = setupInput ? +setupInput.value || 0 : 0;
+    const el = document.getElementById('roi-result');
+    const card = document.getElementById('roiCard');
+    const roiEl = document.getElementById('r-roi');
+    
+    if (setup <= 0 || this.netoAnual <= 0) {
+      roiEl.textContent = '—';
+      roiEl.style.color = 'var(--text)';
+      el.textContent = 'Ingresá presupuesto para simular ROI';
+      card.classList.remove('hi');
+      return;
+    }
+    const roi = Math.round(((this.netoAnual - setup) / setup) * 100);
+    const pb = (setup / (this.netoAnual / 12)).toFixed(1);
+    
+    roiEl.textContent = (roi > 0 ? '+' : '') + roi + '%';
+    roiEl.style.color = roi > 0 ? 'var(--green)' : 'var(--text)';
+    
+    el.textContent = isFinite(+pb) && +pb <= 60
+      ? 'Payback estimado: ' + pb + ' meses'
+      : 'Payback estimado: > 60 meses';
+    card.classList.toggle('hi', roi > 50);
+  },
+
+  animVal(id, s, e, dur) {
+    const el = document.getElementById(id); if(!el) return;
+    let t0 = null;
+    const step = ts => {
+      if(!t0) t0 = ts;
+      const p = Math.min((ts-t0)/dur, 1);
+      el.textContent = '$' + Math.floor(p*(e-s)+s).toLocaleString();
+      if(p<1) requestAnimationFrame(step); else el.textContent = this.fmt(e);
+    };
+    requestAnimationFrame(step);
+  },
+
+  async submitOptin() {
+    const linkedin = document.getElementById('optLinkedIn').value.trim();
+    if (!linkedin) { document.getElementById('optLinkedIn').focus(); return; }
+    const wa = new URLSearchParams(window.location.search).get('wa') || '';
+    
+    // Webhook n8n 
+    try {
+      await fetch('https://n8n-n8n.fu6abb.easypanel.host/webhook-test/560fdcd5-f431-464f-8404-9cb7604debeb', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          linkedin: linkedin,
+          wa: wa,
+          proceso: this.p1,
+          netoAnual: this.netoAnual,
+          directCost: this.directCostGlobal,
+          fuente: 'calculadora_ironman',
+          timestamp: new Date().toISOString()
+        })
+      });
+    } catch(e) { console.error('Webhook error:', e); }
+
+    // Mensaje de éxito
+    const area = document.getElementById('cta-form-area');
+    area.innerHTML = `
+      <div style="font-family:var(--px); font-size:22px; color:var(--text); padding: 20px; border:2px inset var(--ui-sh); background:#f0fff4; text-align:center;">
+        <span style="display:inline-block; margin-bottom:10px; font-size: 32px;">🤝</span><br>
+        ¡PERFIL RECIBIDO EXITOSAMENTE!<br>
+        <span style="font-size:14px; color:var(--muted); margin-top:10px; display:block; font-family:var(--rd);">
+          Mis AI Employees ya procesaron tu perfil. Te voy a estar agregando en breve. <br><strong style="color:var(--green)">Ahora, a tomar acción y empezar a entrenar.</strong>
+        </span>
+      </div>
+    `;
+  }
+};
+
+document.addEventListener('DOMContentLoaded', () => A.init());
+</script>
+</body>
+</html>
